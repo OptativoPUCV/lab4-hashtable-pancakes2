@@ -107,21 +107,13 @@ void eraseMap(HashMap * map, char * key) {
     long idx = hash(key, map->capacity);
     while (map->buckets[idx] != NULL) {
         if (is_equal(map->buckets[idx]->key, key)) {
-            // If the key exists in the map, remove its pair
-            free(map->buckets[idx]);
-            map->buckets[idx] = NULL;
+            // If the key exists in the map, mark its pair as deleted
+            free(map->buckets[idx]->key);
+            map->buckets[idx]->key = NULL;
             map->size--;
-
-            // Shift all subsequent pairs back by one position
-            long next_idx = (idx + 1) % map->capacity;
-            while (map->buckets[next_idx] != NULL) {
-                map->buckets[idx] = map->buckets[next_idx];
-                map->buckets[next_idx] = NULL;
-                idx = next_idx;
-                next_idx = (next_idx + 1) % map->capacity;
-            }
             return;
         }
+        idx = (idx + 1) % map->capacity; // Linear probing
     }
 }
 
