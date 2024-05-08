@@ -122,7 +122,6 @@ void eraseMap(HashMap * map, char * key) {
             }
             return;
         }
-        idx = (idx + 1) % map->capacity; // Linear probing
     }
 }
 
