@@ -150,6 +150,7 @@ Pair * searchMap(HashMap * map,  char * key) {
 
         // Si la llave existe en el mapa, se retorna su par
         if (is_equal(map->buckets[idx]->key, key)) {
+            map->current = idx;
             return map->buckets[idx];
         }
         idx = (idx + 1) % map->capacity; // Se realiza linear probing
