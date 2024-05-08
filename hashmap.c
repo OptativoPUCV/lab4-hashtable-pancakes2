@@ -122,6 +122,7 @@ Pair * searchMap(HashMap * map,  char * key) {
     while (map->buckets[idx] != NULL) {
         if (is_equal(map->buckets[idx]->key, key)) {
             // If the key exists in the map, return its pair
+            map->current = idx;
             return map->buckets[idx];
         }
         idx = (idx + 1) % map->capacity; // Linear probing
