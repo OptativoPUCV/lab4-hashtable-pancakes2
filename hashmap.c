@@ -40,39 +40,111 @@ int is_equal(void* key1, void* key2){
 
 
 void insertMap(HashMap * map, char * key, void * value) {
+    long idx = hash(key, map->capacity);
+    while (map->buckets[idx] != NULL) {
+        if (is_equal(map->buckets[idx]->key, key)) {
+            // If the key already exists in the map, update its value
+            map->buckets[idx]->value = value;
+            return;
+        }
+        idx = (idx + 1) % map->capacity; // Linear probing
+    }
+    map->buckets[idx] = createPair(key, value);
+    map->size++;
 
-
+    // If the load factor exceeds 0.7, enlarge the map
+    if ((double)map->size / map->capacity > 0.7) {
+        enlarge(map);
+    }
 }
 
 void enlarge(HashMap * map) {
     enlarge_called = 1; //no borrar (testing purposes)
 
+    long new_capacity = map->capacity * 2;
+    HashMap *new_map = createMap(new_capacity);
 
+    for (long i = 0; i < map->capacity; i++) {
+        Pair *pair = map->buckets[i];
+        if (pair != NULL) {
+            insertMap(new_map, pair->key, pair->value);
+        }
+    }
+
+    // Free the old map's buckets array, but not the pairs themselves
+    free(map->buckets);
+
+    // Copy the new map's data over to the old map
+    map->buckets = new_map->buckets;
+    map->capacity = new_map->capacity;
+    map->size = new_map->size;
+
+    // Free the new map structure (but not the buckets array, which we're still using)
+    free(new_map);
 }
 
 
 HashMap * createMap(long capacity) {
+    HashMap *map = (HashMap *)malloc(sizeof(HashMap));
+    if (map == NULL) {
+        return NULL; // memory allocation failed
+    }
 
-    return NULL;
+    map->buckets = (Pair **)calloc(capacity, sizeof(Pair *));
+    if (map->buckets == NULL) {
+        free(map); // free the previously allocated memory
+        return NULL; // memory allocation failed
+    }
+
+    map->size = 0;
+    map->capacity = capacity;
+    map->current = -1; // set to -1 as no data has been accessed yet
+
+    return map;
 }
 
-void eraseMap(HashMap * map,  char * key) {    
-
-
+void eraseMap(HashMap * map, char * key) {
+    long idx = hash(key, map->capacity);
+    while (map->buckets[idx] != NULL) {
+        if (is_equal(map->buckets[idx]->key, key)) {
+            // If the key exists in the map, erase its pair
+            free(map->buckets[idx]);
+            map->buckets[idx] = NULL;
+            map->size--;
+            return;
+        }
+        idx = (idx + 1) % map->capacity; // Linear probing
+    }
 }
 
 Pair * searchMap(HashMap * map,  char * key) {   
-
-
-    return NULL;
+    long idx = hash(key, map->capacity);
+    while (map->buckets[idx] != NULL) {
+        if (is_equal(map->buckets[idx]->key, key)) {
+            // If the key exists in the map, return its pair
+            return map->buckets[idx];
+        }
+        idx = (idx + 1) % map->capacity; // Linear probing
+    }
+    return NULL; // Key not found
 }
 
 Pair * firstMap(HashMap * map) {
-
-    return NULL;
+    for (long i = 0; i < map->capacity; i++) {
+        if (map->buckets[i] != NULL) {
+            map->current = i;
+            return map->buckets[i];
+        }
+    }
+    return NULL; // No non-NULL pairs found
 }
 
 Pair * nextMap(HashMap * map) {
-
-    return NULL;
+    for (long i = map->current + 1; i < map->capacity; i++) {
+        if (map->buckets[i] != NULL) {
+            map->current = i;
+            return map->buckets[i];
+        }
+    }
+    return NULL; // No more non-NULL pairs found
 }
