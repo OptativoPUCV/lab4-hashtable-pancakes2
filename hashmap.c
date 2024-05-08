@@ -111,9 +111,7 @@ void eraseMap(HashMap * map, char * key) {
             free(map->buckets[idx]);
             map->buckets[idx] = NULL;
             map->size--;
-            return;
         }
-        idx = (idx + 1) % map->capacity; // Linear probing
     }
 }
 
